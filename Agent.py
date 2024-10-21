@@ -227,7 +227,35 @@ class Agent(Base_Agent):
         else:
             drawer.clear("status")
 
-        formation_positions = GenerateBasicFormation()
+        if (strategyData.playmode != self.world.M_Play_On) :
+            formation_positions = GenerateBasicFormation()
+
+        elif (strategyData.playmode != self.world.M_KickOff_Left) :
+            formation_positions = GenerateKickOff_LeftFormation()
+
+        elif (strategyData.playmode != self.world.M_KickOff_Right) :
+            formation_positions = GenerateKickOff_RightFormation()
+
+        elif (strategyData.playmode != self.world.M_KickIn_Left) :
+            formation_positions = GenerateKickIn_LeftFormation()
+
+        elif (strategyData.playmode != self.world.M_KickIn_Right) :
+            formation_positions = GenerateKickIn_RightFormation()
+
+        elif (strategyData.playmode != self.world.M_CORNER_KICK_LEFT) :
+            formation_positions = GenerateCORNER_KICK_LEFTFormation()
+
+        elif (strategyData.playmode != self.world.M_CORNER_KICK_RIGHT) :
+            formation_positions = GenerateCORNER_KICK_RIGHTFormation()
+
+        elif (strategyData.playmode != self.world.M_FREE_KICK_LEFT) :
+            formation_positions = GenerateFREE_KICK_LEFTFormation()
+
+        elif (strategyData.playmode != self.world.M_FREE_KICK_Right) :
+            formation_positions = GenerateFREE_KICK_RightFormation()
+        
+
+
         point_preferences = role_assignment(strategyData.teammate_positions, formation_positions)
         strategyData.my_desired_position = point_preferences[strategyData.player_unum]
         strategyData.my_desried_orientation = strategyData.GetDirectionRelativeToMyPositionAndTarget(strategyData.my_desired_position)
@@ -253,7 +281,14 @@ class Agent(Base_Agent):
         if strategyData.active_player_unum == strategyData.robot_model.unum: # I am the active player 
             target = pass_reciever_selector(strategyData.player_unum, strategyData.teammate_positions, (15,0))
             drawer.line(strategyData.mypos, target, 2,drawer.Color.red,"pass line")
-            return self.kickTarget(strategyData,strategyData.mypos,target)
+            if (oppClose (strategyData)):
+                return self.kickTarget(strategyData,strategyData.mypos,target)
+            elif (strategyData.playmode != self.world.M_Play_On) :
+                return self.kickTarget(strategyData,strategyData.mypos,target)
+            elif (strategyData.ball_2d[0] > 12 and strategyData.ball_2d[1] < 5 and strategyData.ball_2d[1] > -5):
+                return self.kickTarget(strategyData,strategyData.mypos,(15,0))
+            else :
+                return self.behavior.execute("Dribble" , None , None )
         else:
             drawer.clear("pass line")
             return self.move(strategyData.my_desired_position, orientation=strategyData.ball_dir)
